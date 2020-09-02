@@ -81,11 +81,17 @@ class GameDesignUtility:
             self.stat[i]["Entrybox"] = tk.Entry(self.input_frame)
             self.stat[i]["Entrybox"].grid(row = rownum, column = 2)
             self.stat[i]["Entrybox"].insert(END, self.stat[i]["Value"])
-        
-            self.stat[i]["Set Button"] = Button(self.input_frame, text = "Set", command = self.set_stat)
-            self.stat[i]["Set Button"].grid(row = rownum, column = 3)
-
             rownum += 1
+
+        # Add a field for Day
+        Label(self.input_frame, text = "Day #"). grid(row = rownum, column = 1)
+        self.date_entrybox = tk.Entry(self.input_frame)
+        self.date_entrybox.grid(row = rownum, column = 2)
+        self.date_entrybox.insert(END, self.day_count)
+        self.set_button = Button(self.input_frame, text = "Set date and stats", command = self.set_all)
+        self.set_button.grid(row=rownum, column = 3)
+
+        rownum += 1
 
         self.reset_button = Button(self.input_frame, text = "Reset Game", command = self.reset)
         self.reset_button.grid(row = rownum, column = 2)
@@ -105,6 +111,8 @@ class GameDesignUtility:
         
         #increment the day count
         self.day_count += 1
+        self.date_entrybox.delete(0,'end')
+        self.date_entrybox.insert(END, self.day_count)
 
         #create a line that adds to the bottom of the output
         output_line = 'Day: {}, {}'.format(self.day_count, today_activity)
@@ -116,8 +124,22 @@ class GameDesignUtility:
         print(self.output)
 
 
-    def set_stat(self):
-        pass
+    def set_all(self):
+        #this function sets everything
+        
+        #grab all the values from the boxes and save it to the game variables
+        for i in self.stat_list:
+            self.stat[i]["Value"] = int(self.stat[i]["Entrybox"].get())
+            self.day_count = int(self.date_entrybox.get())
+
+        #create a line that adds to the bottom of the output
+        output_line = 'Day: {}, manual set'.format(self.day_count)
+        for i in self.stat_list:
+            output_line += ", Stat {}:{} ".format(i, self.stat[i]["Value"])
+
+        self.output.append(output_line)
+        self.output_textbox.insert(tk.END, output_line+"\n")
+        print(self.output)
 
 
     def save_to_file(self):
@@ -126,11 +148,13 @@ class GameDesignUtility:
 
     def reset(self):
         for i in self.stat_list:
-            self.stat[i] = {}
             self.stat[i]["Value"] = 30
-            self.stat[i]["Entrybox"].grid(row = rownum, column = 2)
+            self.stat[i]["Entrybox"].delete(0,'end')
             self.stat[i]["Entrybox"].insert(END, self.stat[i]["Value"])
-        self.output = {}
+            self.day_count = 0
+            self.date_entrybox.delete(0,'end')
+            self.date_entrybox.insert(END, self.day_count)
+        self.output = []
         self.output_textbox.delete(1.0,END)
 
 
