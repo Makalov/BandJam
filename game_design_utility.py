@@ -11,6 +11,10 @@ class GameDesignUtility:
         #setup output
         self.output = []
 
+        #setup csv file output
+        self.csv_output = []
+        self.csv_output.append("Day,Activity,A,B,C,D,E,F,G,Note")
+
         #setup variable to keep track of game date
         self.day_count = 0
 
@@ -88,14 +92,29 @@ class GameDesignUtility:
         self.date_entrybox = tk.Entry(self.input_frame)
         self.date_entrybox.grid(row = rownum, column = 2)
         self.date_entrybox.insert(END, self.day_count)
-        self.set_button = Button(self.input_frame, text = "Set date and stats", command = self.set_all)
-        self.set_button.grid(row=rownum, column = 3)
-
         rownum += 1
 
-        self.reset_button = Button(self.input_frame, text = "Reset Game", command = self.reset)
-        self.reset_button.grid(row = rownum, column = 2)
+        # Add textbox for notes
+        self.notes_textbox = tk.Text(self.input_frame, width = 28, height=5)
+        Label(self.input_frame, text = "Notes"). grid(row = rownum, column = 1)
+        self.notes_textbox.grid(row=rownum, column = 2, columnspan = 2)
+        self.notes_scrollbar = tk.Scrollbar(self.input_frame, command=self.notes_textbox.yview)
+        self.notes_scrollbar.grid(row=rownum, column = 4, sticky='nsew')
+        self.notes_textbox.config(yscrollcommand=self.notes_scrollbar.set)
+        rownum += 1
 
+        # Add button to save date and time
+        self.set_button = Button(self.input_frame, text = "Set date and stats", command = self.set_all)
+        self.set_button.grid(row=rownum, column = 2)
+
+        self.reset_button = Button(self.input_frame, text = "Reset Game", command = self.reset)
+        self.reset_button.grid(row = rownum, column = 3)
+        rownum +=1
+
+        # Add a field for File Name
+        Label(self.input_frame, text = "File Name"). grid(row = rownum, column = 1)
+        self.filename_entrybox = tk.Entry(self.input_frame)
+        self.filename_entrybox.grid(row = rownum, column = 2)
         self.save_button = Button(self.input_frame, text = "Save to file", command = self.save_to_file)
         self.save_button.grid(row = rownum, column = 3)
         
@@ -116,9 +135,12 @@ class GameDesignUtility:
 
         #create a line that adds to the bottom of the output
         output_line = 'Day: {}, {}'.format(self.day_count, today_activity)
+        csv_line = '{},{}'.format(self.day_count, today_activity)
         for i in self.stat_list:
             output_line += ", Stat {}:{} ".format(i, self.stat[i]["Value"])
+            csv_line += ",{}".format(self.stat[i]["Value"])
 
+        self.csv_output.append(csv_line)
         self.output.append(output_line)
         self.output_textbox.insert(tk.END, output_line+"\n")
         print(self.output)
@@ -134,16 +156,27 @@ class GameDesignUtility:
 
         #create a line that adds to the bottom of the output
         output_line = 'Day: {}, manual set'.format(self.day_count)
+        csv_line = '{},Manual Set'.format(self.day_count)
         for i in self.stat_list:
             output_line += ", Stat {}:{} ".format(i, self.stat[i]["Value"])
+            csv_line += ",{}".format(self.stat[i]["Value"])
+        output_line += ", Note: {}".format(self.notes_textbox.get("1.0", END))  
+        csv_line += ", {}".format(self.notes_textbox.get("1.0", END))  
 
+        self.csv_output.append(csv_line)
         self.output.append(output_line)
         self.output_textbox.insert(tk.END, output_line+"\n")
-        print(self.output)
+        #print(self.output)
 
 
     def save_to_file(self):
-        pass
+        if self.filename_entrybox.get() == "":
+            output_filename = "sample_output.csv"
+        else:
+            output_filename = (self.filename_entrybox.get() + ".csv")
+        f = open(output_filename, "w")
+        for i in self.csv_output:
+            f.write(i+'\n')
 
 
     def reset(self):
