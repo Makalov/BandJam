@@ -4,12 +4,14 @@ import json
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
+from settings import *
 
 class GameDesignUtility:
     
     def __init__(self, master):
         #setup output
         self.output = []
+        self.setting = Settings()
 
         #setup csv file output
         self.csv_output = []
@@ -47,30 +49,14 @@ class GameDesignUtility:
         self.activity = StringVar(master)
         self.activity.set("Activity Z")
 
-        # Create an activity and a stat list, will load from file later
-        self.activity_list = ["Activity Z", "Activity Y", "Activity X", "Activity W", "Activity V", "Activity U", "Activity T"]
-        self.stat_list = ["A", "B", "C", "D", "E", "F", "G"]
-
         #set up stat dictionary with initial stat values
         self.stat = {}
-        for i in self.stat_list:
+        for i in self.setting.stat_list:
             self.stat[i] = {}
             self.stat[i]["Value"] = 30
 
-        #set up activity dictionary with what they do, will load from file later
-        self.activity_dict = {}
-        for i in self.activity_list:
-            self.activity_dict[i]={}
-        self.activity_dict["Activity Z"]= {"A":2, "F":-2}
-        self.activity_dict["Activity Y"]= {"A":-2, "B":2, "D":1}
-        self.activity_dict["Activity X"]= {"B":-2, "G":2, "C":-1}
-        self.activity_dict["Activity W"]= {"C": 2, "G":2, "A":-1}
-        self.activity_dict["Activity V"]= {"D": 2, "F":2, "A":-1}
-        self.activity_dict["Activity U"]= {"D": -2, "E":-2, "G":1}
-        self.activity_dict["Activity T"]= {"F":2, "G":2, "C":-1}
-
         # Put Activity drop down on GUI
-        self.event_menu = OptionMenu(self.input_frame, self.activity, *self.activity_list)
+        self.event_menu = OptionMenu(self.input_frame, self.activity, *self.setting.activity_list)
         Label(self.input_frame, text="Choose activity").grid(row = 1, column = 1)
         self.event_menu.grid(row = 1, column = 2)
 
@@ -123,8 +109,8 @@ class GameDesignUtility:
         #figure out what activity to do by looking at what's selected in the drop down list
         today_activity = self.activity.get()
         #cycle through the stat increases in the activity and add it to the stat
-        for i in self.activity_dict[today_activity]:
-            self.stat[i]["Value"] += self.activity_dict[today_activity][i]
+        for i in self.setting.activity_dict[today_activity]:
+            self.stat[i]["Value"] += self.setting.activity_dict[today_activity][i]
             self.stat[i]["Entrybox"].delete(0,'end')
             self.stat[i]["Entrybox"].insert(END, self.stat[i]["Value"])
         
@@ -136,7 +122,7 @@ class GameDesignUtility:
         #create a line that adds to the bottom of the output
         output_line = 'Day: {}, {}'.format(self.day_count, today_activity)
         csv_line = '{},{}'.format(self.day_count, today_activity)
-        for i in self.stat_list:
+        for i in self.setting.stat_list:
             output_line += ", Stat {}:{} ".format(i, self.stat[i]["Value"])
             csv_line += ",{}".format(self.stat[i]["Value"])
 
@@ -150,14 +136,14 @@ class GameDesignUtility:
         #this function sets everything
         
         #grab all the values from the boxes and save it to the game variables
-        for i in self.stat_list:
+        for i in self.setting.stat_list:
             self.stat[i]["Value"] = int(self.stat[i]["Entrybox"].get())
             self.day_count = int(self.date_entrybox.get())
 
         #create a line that adds to the bottom of the output
         output_line = 'Day: {}, manual set'.format(self.day_count)
         csv_line = '{},Manual Set'.format(self.day_count)
-        for i in self.stat_list:
+        for i in self.setting.stat_list:
             output_line += ", Stat {}:{} ".format(i, self.stat[i]["Value"])
             csv_line += ",{}".format(self.stat[i]["Value"])
         output_line += ", Note: {}".format(self.notes_textbox.get("1.0", END))  
@@ -180,7 +166,7 @@ class GameDesignUtility:
 
 
     def reset(self):
-        for i in self.stat_list:
+        for i in self.setting.stat_list:
             self.stat[i]["Value"] = 30
             self.stat[i]["Entrybox"].delete(0,'end')
             self.stat[i]["Entrybox"].insert(END, self.stat[i]["Value"])
