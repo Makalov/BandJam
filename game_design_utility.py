@@ -15,7 +15,7 @@ class GameDesignUtility:
 
         #setup csv file output
         self.csv_output = []
-        self.csv_output.append("Day,Activity,A,B,C,D,E,F,G,Note")
+        self.csv_output.append("Day,Activity,Charisma,Creativity,Vitality,Technical SKill,Street Cred,Intelligence,Energy,Note")
 
         #setup variable to keep track of game date
         self.day_count = 0
@@ -108,9 +108,18 @@ class GameDesignUtility:
     def do_activity(self):
         #figure out what activity to do by looking at what's selected in the drop down list
         today_activity = self.activity.get()
-        #cycle through the stat increases in the activity and add it to the stat
+
+        #cycle through the stat increases in the activity and add it to the stat but also check if they are out of bound
         for i in self.setting.activity_dict[today_activity]:
             self.stat[i]["Value"] += self.setting.activity_dict[today_activity][i]
+
+            #check if the values are maxed out or below minimum
+            if self.stat[i]["Value"] >= self.setting.stat_dict[i]["Max"]:
+                self.stat[i]["Value"] = self.setting.stat_dict[i]["Max"]
+            elif self.stat[i]["Value"] <= self.setting.stat_dict[i]["Min"]:
+                self.stat[i]["Value"] = self.setting.stat_dict[i]["Min"]
+            
+            #write the new value into the box
             self.stat[i]["Entrybox"].delete(0,'end')
             self.stat[i]["Entrybox"].insert(END, self.stat[i]["Value"])
         
@@ -120,16 +129,16 @@ class GameDesignUtility:
         self.date_entrybox.insert(END, self.day_count)
 
         #create a line that adds to the bottom of the output
-        output_line = 'Day: {}, {}'.format(self.day_count, today_activity)
         csv_line = '{},{}'.format(self.day_count, today_activity)
+        output_line = 'Day:'+csv_line
         for i in self.setting.stat_list:
-            output_line += ", Stat {}:{} ".format(i, self.stat[i]["Value"])
+            output_line += ", {}:{} ".format(i, self.stat[i]["Value"])
             csv_line += ",{}".format(self.stat[i]["Value"])
 
         self.csv_output.append(csv_line)
         self.output.append(output_line)
         self.output_textbox.insert(tk.END, output_line+"\n")
-        print(self.output)
+        #print(self.output)
 
 
     def set_all(self):
@@ -167,7 +176,7 @@ class GameDesignUtility:
 
     def reset(self):
         for i in self.setting.stat_list:
-            self.stat[i]["Value"] = 30
+            self.stat[i]["Value"] = self.setting.stat_dict[i]["Default"]
             self.stat[i]["Entrybox"].delete(0,'end')
             self.stat[i]["Entrybox"].insert(END, self.stat[i]["Value"])
             self.day_count = 0
