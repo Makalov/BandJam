@@ -5,6 +5,7 @@ from tkinter import *
 import tkinter as tk
 from tkinter import ttk
 from settings import *
+import random
 
 class GameDesignUtility:
     
@@ -54,18 +55,31 @@ class GameDesignUtility:
         for i in self.setting.stat_list:
             self.stat[i] = {}
             self.stat[i]["Value"] = 30
+            
+        # set up row number variable to increment to easily insert a row
+        rownum = 1
+
+        # Add buttons to load bandmates
+        Label(self.input_frame, text="Add Primary Bandmate").grid(row = rownum, column = 1)
+        self.add_bandmate_button = Button(self.input_frame, text = "Add Primary Bandmate", command=self.add_primary_bandmate)
+        self.add_bandmate_button.grid(row = rownum, column = 2)
+
+        Label(self.input_frame, text="Add Secondary Bandmate").grid(row = rownum, column = 1)
+        self.add_bandmate_button = Button(self.input_frame, text = "Add Secondary Bandmate", command=self.add_secondary_bandmate)
+        self.add_bandmate_button.grid(row = rownum, column = 3)
+        rownum += 1
 
         # Put Activity drop down on GUI
         self.event_menu = OptionMenu(self.input_frame, self.activity, *self.setting.activity_list)
-        Label(self.input_frame, text="Choose activity").grid(row = 1, column = 1)
-        self.event_menu.grid(row = 1, column = 2)
+        Label(self.input_frame, text="Choose activity").grid(row = rownum, column = 1)
+        self.event_menu.grid(row = rownum, column = 2)
 
         # Add button to perform activity
         self.activity_button = Button(self.input_frame, text = "Perform Activity", command=self.do_activity)
-        self.activity_button.grid(row = 1, column = 3)
-       
+        self.activity_button.grid(row = rownum, column = 3)
+        rownum += 1
+
         # Add the stats boxes and the set stat buttons and populate with value
-        rownum = 2
         for i in self.stat:
             Label(self.input_frame, text = i).grid(row = rownum, column = 1)
             self.stat[i]["Entrybox"] = tk.Entry(self.input_frame)
@@ -104,6 +118,50 @@ class GameDesignUtility:
         self.save_button = Button(self.input_frame, text = "Save to file", command = self.save_to_file)
         self.save_button.grid(row = rownum, column = 3)
         
+    def add_primary_bandmate(self):
+        #grab all primary bandmate's indexes and put them in a list
+        primary_list = []
+        for i in self.setting.bandmate_dict.keys():
+            #the index's are set up so only the ones divisible by 10s are primary members
+            if int(i) % 10 == 0:
+                primary_list.append(i)
+
+        #grab a random index
+        bandmate_index = random.choice(primary_list)
+
+        #create a new window with the band_member's stats
+        popup = Tk()
+        popup.wm_title(bandmate_index)
+        Label(popup, text="Band Member Name").grid(row = 1, column = 1)
+        bandmate_rownum = 2
+        for stat in self.setting.bandmate_dict[bandmate_index].keys():
+            Label(popup, text=stat).grid(row=bandmate_rownum, column = 1)
+            stat_limit = str(self.setting.bandmate_dict[bandmate_index][stat])
+            Label(popup, text=stat_limit).grid(row=bandmate_rownum, column = 2)
+            bandmate_rownum +=1
+        Button(popup, text="Kill", command = popup.destroy).grid(row = bandmate_rownum, column = 1)
+        popup.mainloop()
+
+    def add_secondary_bandmate(self):
+        #grab all primary bandmate's indexes
+        primary_list = []
+        print(self.setting.bandmate_dict.keys())
+        for i in self.setting.bandmate_dict.keys():
+            print(i)
+            if i % 10 == 0:
+                primary_list.append(i)
+        print(primary_list)
+
+
+        print(random.choice(foo))
+        popup = Tk()
+        popup.wm_title("!")
+        msg = "boo"
+        label = ttk.Label(popup, text=msg)
+        label.pack(side="top", fill="x", pady=10)
+        B1 = ttk.Button(popup, text="Kill", command = popup.destroy)
+        B1.pack()
+        popup.mainloop()
 
     def do_activity(self):
         #figure out what activity to do by looking at what's selected in the drop down list

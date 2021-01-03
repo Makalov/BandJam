@@ -36,5 +36,35 @@ class Settings:
         self.stat_dict["Intelligence"]= {"Max":60, "Min":0, "Default":30}
         self.stat_dict["Energy"]= {"Max":60, "Min":0, "Default":30}
 
+        #set up bandmate dictionary structure
+        self.bandmate_dict = {}
+
+        #populate bandmate stats
+        self.bandmate_dict["10"]= {}
+        self.bandmate_dict["10"]["Creativity"]= {"Above":60}
+        self.bandmate_dict["10"]["Technical Skill"]={"Above":50}
+        self.bandmate_dict["10"]["Intelligence"] = {"Above":30}
+
+        self.bandmate_dict["11"]= {}
+        self.bandmate_dict["11"]["Creativity"]= {"Above":50}
+
+        self.bandmate_dict["12"]= {}
+        self.bandmate_dict["12"]["Technical Skill"]={"Above":40} 
+
+        self.bandmate_dict["20"]={}
+        self.bandmate_dict["20"]["Charisma"]= {"Above":40}
+        self.bandmate_dict["20"]["Creativity"]={"Equal":0}
+        self.bandmate_dict["20"]["Intelligence"] = {"Below":30} 
+
+        self.bandmate_dict["21"]={}
+        self.bandmate_dict["21"]["Charisma"]= {"Above":40}
+
+        self.bandmate_dict["22"]={}
+        self.bandmate_dict["22"]["Creativity"]={"Equal":0}
 
 
+
+class Bandmate:
+    def __init__(self):
+        self.activity_list = ["Activity Z", "Activity Y", "Activity X", "Activity W", "Activity V", "Activity U", "Activity T", "Activity S"]
+        self.stat_list = ["Charisma", "Creativity", "Vitality", "Technical Skill", "Street Cred", "Intelligence", "Energy"]    
