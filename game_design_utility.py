@@ -21,6 +21,23 @@ class GameDesignUtility:
         #setup variable to keep track of game date
         self.day_count = 0
 
+        #setup the list of primary characters in an array
+        primary_bandmate_list = []
+        for i in self.setting.bandmate_dict.keys():
+            #the index's are set up so only the ones divisible by 10s are primary members
+            if int(i) % 10 == 0:
+                primary_bandmate_list.append(i)
+
+
+        #setup the list of secondary characters in the dictionary format {primary #:array of secondary #s}
+        secondary_bandmate_list = {}
+        for i in primary_bandmate_list:
+            secondary_bandmate_list[i] = []
+            for j in self.setting.bandmate_dict.keys():
+                if int(j) > int(i) and int(j) < (int(i)+10):
+                    secondary_bandmate_list[i].append(j)
+                    
+
         # Add the base frame. Two frames sits aon this base frame, the left input frame and the right output frame
         self.master = master
         self.master.title("Game Design Utility")
@@ -119,12 +136,7 @@ class GameDesignUtility:
         self.save_button.grid(row = rownum, column = 3)
         
     def add_primary_bandmate(self):
-        #grab all primary bandmate's indexes and put them in a list
-        primary_list = []
-        for i in self.setting.bandmate_dict.keys():
-            #the index's are set up so only the ones divisible by 10s are primary members
-            if int(i) % 10 == 0:
-                primary_list.append(i)
+
 
         #grab a random index
         bandmate_index = random.choice(primary_list)
@@ -143,25 +155,8 @@ class GameDesignUtility:
         popup.mainloop()
 
     def add_secondary_bandmate(self):
-        #grab all primary bandmate's indexes
-        primary_list = []
-        print(self.setting.bandmate_dict.keys())
-        for i in self.setting.bandmate_dict.keys():
-            print(i)
-            if i % 10 == 0:
-                primary_list.append(i)
-        print(primary_list)
-
-
-        print(random.choice(foo))
-        popup = Tk()
-        popup.wm_title("!")
-        msg = "boo"
-        label = ttk.Label(popup, text=msg)
-        label.pack(side="top", fill="x", pady=10)
-        B1 = ttk.Button(popup, text="Kill", command = popup.destroy)
-        B1.pack()
-        popup.mainloop()
+        pass   
+ 
 
     def do_activity(self):
         #figure out what activity to do by looking at what's selected in the drop down list
