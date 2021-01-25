@@ -21,23 +21,6 @@ class GameDesignUtility:
         #setup variable to keep track of game date
         self.day_count = 0
 
-        #setup the list of primary characters in an array
-        primary_bandmate_list = []
-        for i in self.setting.bandmate_dict.keys():
-            #the index's are set up so only the ones divisible by 10s are primary members
-            if int(i) % 10 == 0:
-                primary_bandmate_list.append(i)
-
-
-        #setup the list of secondary characters in the dictionary format {primary #:array of secondary #s}
-        secondary_bandmate_list = {}
-        for i in primary_bandmate_list:
-            secondary_bandmate_list[i] = []
-            for j in self.setting.bandmate_dict.keys():
-                if int(j) > int(i) and int(j) < (int(i)+10):
-                    secondary_bandmate_list[i].append(j)
-                    
-
         # Add the base frame. Two frames sits aon this base frame, the left input frame and the right output frame
         self.master = master
         self.master.title("Game Design Utility")
@@ -72,6 +55,10 @@ class GameDesignUtility:
         for i in self.setting.stat_list:
             self.stat[i] = {}
             self.stat[i]["Value"] = 30
+
+        #set up array to store bandmates and a dictionary to store popup windows
+        self.current_bandmates = []
+        self.bandmate_popups = {}
             
         # set up row number variable to increment to easily insert a row
         rownum = 1
@@ -134,25 +121,32 @@ class GameDesignUtility:
         self.filename_entrybox.grid(row = rownum, column = 2)
         self.save_button = Button(self.input_frame, text = "Save to file", command = self.save_to_file)
         self.save_button.grid(row = rownum, column = 3)
-        
-    def add_primary_bandmate(self):
 
-
-        #grab a random index
-        bandmate_index = random.choice(primary_list)
-
-        #create a new window with the band_member's stats
-        popup = Tk()
-        popup.wm_title(bandmate_index)
-        Label(popup, text="Band Member Name").grid(row = 1, column = 1)
+    def create_bandmate_window(self, bandmate_index):
+        #draws the popup window for the bandmate
+        self.bandmate_popups[bandmate_index] = Tk()
+        self.bandmate_popups[bandmate_index].wm_title(bandmate_index)
+        Label(self.bandmate_popups[bandmate_index], text="Band Member Name").grid(row = 1, column = 1)
         bandmate_rownum = 2
         for stat in self.setting.bandmate_dict[bandmate_index].keys():
-            Label(popup, text=stat).grid(row=bandmate_rownum, column = 1)
-            stat_limit = str(self.setting.bandmate_dict[bandmate_index][stat])
-            Label(popup, text=stat_limit).grid(row=bandmate_rownum, column = 2)
+            #print out all the stat conditions to be met for the character
+            Label(self.bandmate_popups[bandmate_index], text=stat).grid(row=bandmate_rownum, column = 1)
+            stat_cond = str(self.setting.bandmate_dict[bandmate_index][stat])
+            Label(self.bandmate_popups[bandmate_index], text=stat_cond).grid(row=bandmate_rownum, column = 2)
             bandmate_rownum +=1
-        Button(popup, text="Kill", command = popup.destroy).grid(row = bandmate_rownum, column = 1)
-        popup.mainloop()
+        Button(self.bandmate_popups[bandmate_index], text="Kill", command = self.bandmate_popups[bandmate_index].destroy).grid(row = bandmate_rownum, column = 1)
+        self.bandmate_popups[bandmate_index].mainloop()
+
+    def add_primary_bandmate(self):
+
+        #grab a random index
+        bandmate_index = random.choice(self.setting.get_primary_list())
+        if bandmate_index not in self.current_bandmates:
+            self.current_bandmates.append(bandmate_index)
+            self.create_bandmate_window(bandmate_index)
+        else:
+            pass
+            
 
     def add_secondary_bandmate(self):
         pass   

@@ -62,9 +62,21 @@ class Settings:
         self.bandmate_dict["22"]={}
         self.bandmate_dict["22"]["Creativity"]={"Equal":0}
 
+    def get_primary_list(self):
+        primary_bandmate_list = []
+        for i in self.bandmate_dict.keys():
+            #the index's are set up so only the ones divisible by 10s are primary members
+            if int(i) % 10 == 0:
+                primary_bandmate_list.append(i)
+        return primary_bandmate_list
 
+    def get_secondary_list(self):
+        secondary_bandmate_dict = {}
+        for i in primary_bandmate_list:
+            secondary_bandmate_dict[i] = []
+            for j in self.setting.bandmate_dict.keys():
+                #the index's are set up so the secondary is between 1-9 above its primary
+                if int(j) > int(i) and int(j) < (int(i)+10):
+                    secondary_bandmate_dict[i].append(j)
+        return secondary_bandmate_dict
 
-class Bandmate:
-    def __init__(self):
-        self.activity_list = ["Activity Z", "Activity Y", "Activity X", "Activity W", "Activity V", "Activity U", "Activity T", "Activity S"]
-        self.stat_list = ["Charisma", "Creativity", "Vitality", "Technical Skill", "Street Cred", "Intelligence", "Energy"]    
