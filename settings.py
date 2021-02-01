@@ -41,7 +41,7 @@ class Settings:
 
         #populate bandmate stats
         self.bandmate_dict["10"]= {}
-        self.bandmate_dict["10"]["Creativity"]= {"Above":60}
+        self.bandmate_dict["10"]["Creativity"]= {"Above":59}
         self.bandmate_dict["10"]["Technical Skill"]={"Above":50}
         self.bandmate_dict["10"]["Intelligence"] = {"Above":30}
 

@@ -6,6 +6,7 @@ import tkinter as tk
 from tkinter import ttk
 from settings import *
 import random
+import functools
 
 class GameDesignUtility:
     
@@ -71,6 +72,11 @@ class GameDesignUtility:
         Label(self.input_frame, text="Add Secondary Bandmate").grid(row = rownum, column = 1)
         self.add_bandmate_button = Button(self.input_frame, text = "Add Secondary Bandmate", command=self.add_secondary_bandmate)
         self.add_bandmate_button.grid(row = rownum, column = 3)
+
+        # Add button to check if conditions met
+        Label(self.input_frame, text="Check Bandmate Kick").grid(row = rownum, column = 1)
+        self.check_bandmate_button = Button(self.input_frame, text = "Check Bandmate Kick", command=self.check_bandmate_kick)
+        self.check_bandmate_button.grid(row = rownum, column = 4)
         rownum += 1
 
         # Put Activity drop down on GUI
@@ -134,22 +140,55 @@ class GameDesignUtility:
             stat_cond = str(self.setting.bandmate_dict[bandmate_index][stat])
             Label(self.bandmate_popups[bandmate_index], text=stat_cond).grid(row=bandmate_rownum, column = 2)
             bandmate_rownum +=1
-        Button(self.bandmate_popups[bandmate_index], text="Kill", command = self.bandmate_popups[bandmate_index].destroy).grid(row = bandmate_rownum, column = 1)
-        self.bandmate_popups[bandmate_index].mainloop()
+        Button(self.bandmate_popups[bandmate_index], text="Kill", command = lambda:self.remove_bandmate(bandmate_index)).grid(row = bandmate_rownum, column = 1)
+
 
     def add_primary_bandmate(self):
-
-        #grab a random index
-        bandmate_index = random.choice(self.setting.get_primary_list())
-        if bandmate_index not in self.current_bandmates:
-            self.current_bandmates.append(bandmate_index)
-            self.create_bandmate_window(bandmate_index)
-        else:
-            pass
-            
+        new_bandmate_index = -1
+        #repeat until we find a primary bandmate stat that's not already there
+        if len(self.current_bandmates) <2:
+            while new_bandmate_index not in self.current_bandmates:
+                #grab a stat from the list
+                new_bandmate_index = random.choice(self.setting.get_primary_list())
+                #add stat if not there
+                if new_bandmate_index not in self.current_bandmates:
+                    self.current_bandmates.append(new_bandmate_index)
+                    self.create_bandmate_window(new_bandmate_index)
+                else: #else repeat the loop
+                    new_bandmate_index = -1
 
     def add_secondary_bandmate(self):
-        pass   
+        pass
+    
+    def check_bandmate_kick(self):
+        #this function goes through each bandmate in the list and each of their attributes and check if their stats matches with their conditions
+        for i in self.current_bandmates:
+            kick = True
+            #this following loops goes through each stat to see if they match, if any of them do not match they are not kicked
+            for stat in self.setting.bandmate_dict[i].keys():
+                for condition in self.setting.bandmate_dict[i][stat].keys():
+                    if condition == "Above":
+                        if self.stat[stat]["Value"] <= self.setting.bandmate_dict[i][stat][condition]:
+                            kick = False
+                    elif condition == "Equal":
+                        if self.stat[stat]["Value"] < self.setting.bandmate_dict[i][stat][condition]:
+                            kick = False
+                        elif self.stat[stat]["Value"] > self.setting.bandmate_dict[i][stat][condition]:
+                            kick = False
+                    elif condition == "Below":
+                        if self.stat[stat]["Value"] >= self.setting.bandmate_dict[i][stat][condition]:
+                            kick = False
+            if kick == True:
+                self.remove_bandmate(i)
+
+    def remove_bandmate(self, bandmate_index):
+        #remove the bandmate from list and close window
+        self.bandmate_popups[bandmate_index].destroy()
+        #delete the window object
+        del self.bandmate_popups[bandmate_index]
+        #remove the bandmate from the list of current bandmates
+        self.current_bandmates.remove(bandmate_index)
+        print(self.bandmate_popups)
  
 
     def do_activity(self):
@@ -236,4 +275,9 @@ class GameDesignUtility:
 if __name__ == "__main__":
     root = Tk()
     Test1 = GameDesignUtility(root)
+    def on_closing():
+        root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", on_closing)
+
     root.mainloop()
