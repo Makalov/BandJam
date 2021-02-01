@@ -74,8 +74,8 @@ class GameDesignUtility:
         self.add_bandmate_button.grid(row = rownum, column = 3)
 
         # Add button to check if conditions met
-        Label(self.input_frame, text="Check Bandmate Kick").grid(row = rownum, column = 1)
-        self.check_bandmate_button = Button(self.input_frame, text = "Check Bandmate Kick", command=self.check_bandmate_kick)
+        Label(self.input_frame, text="Check Bandmate Quit").grid(row = rownum, column = 1)
+        self.check_bandmate_button = Button(self.input_frame, text = "Check Bandmate Quit", command=self.check_bandmate_quit)
         self.check_bandmate_button.grid(row = rownum, column = 4)
         rownum += 1
 
@@ -160,25 +160,25 @@ class GameDesignUtility:
     def add_secondary_bandmate(self):
         pass
     
-    def check_bandmate_kick(self):
+    def check_bandmate_quit(self):
         #this function goes through each bandmate in the list and each of their attributes and check if their stats matches with their conditions
         for i in self.current_bandmates:
-            kick = True
-            #this following loops goes through each stat to see if they match, if any of them do not match they are not kicked
+            bandmate_quit = True
+            #this following loops goes through each stat to see if they match, if any of them do not match they do not quit
             for stat in self.setting.bandmate_dict[i].keys():
                 for condition in self.setting.bandmate_dict[i][stat].keys():
                     if condition == "Above":
                         if self.stat[stat]["Value"] <= self.setting.bandmate_dict[i][stat][condition]:
-                            kick = False
+                            bandmate_quit = False
                     elif condition == "Equal":
                         if self.stat[stat]["Value"] < self.setting.bandmate_dict[i][stat][condition]:
-                            kick = False
+                            bandmate_quit = False
                         elif self.stat[stat]["Value"] > self.setting.bandmate_dict[i][stat][condition]:
-                            kick = False
+                            bandmate_quit = False
                     elif condition == "Below":
                         if self.stat[stat]["Value"] >= self.setting.bandmate_dict[i][stat][condition]:
-                            kick = False
-            if kick == True:
+                            bandmate_quit = False
+            if bandmate_quit == True:
                 self.remove_bandmate(i)
 
     def remove_bandmate(self, bandmate_index):
@@ -188,7 +188,6 @@ class GameDesignUtility:
         del self.bandmate_popups[bandmate_index]
         #remove the bandmate from the list of current bandmates
         self.current_bandmates.remove(bandmate_index)
-        print(self.bandmate_popups)
  
 
     def do_activity(self):
