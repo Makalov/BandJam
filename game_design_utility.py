@@ -287,8 +287,6 @@ class GameDesignUtility:
             self.output.append(output_line)
             self.output_textbox.insert(tk.END, output_line+"\n")
 
-        print("primary to quit {}".format(self.primary_bandmate_to_quit))
-        print("secondary to quit {}".format(self.secondary_bandmate_to_quit))
 
     def end_of_month(self):
         #this function checks whether there is anybody flagged. If flagged then they quit, otherwise add another bandmate
