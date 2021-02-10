@@ -62,6 +62,35 @@ class Settings:
         self.bandmate_dict["22"]={}
         self.bandmate_dict["22"]["Creativity"]={"Equal":0}
 
+        self.bandmate_dict["30"]= {}
+        self.bandmate_dict["30"]["Vitality"]= {"Above":30}
+        self.bandmate_dict["30"]["Street Cred"]={"Above":50}
+        self.bandmate_dict["30"]["Intelligence"] = {"Below":20}
+
+        self.bandmate_dict["31"]={}
+        self.bandmate_dict["31"]["Vitality"]= {"Above":40}
+
+        self.bandmate_dict["32"]={}
+        self.bandmate_dict["32"]["Street Cred"]={"Above":40}
+
+        self.bandmate_dict["40"]= {}
+        self.bandmate_dict["40"]["Technical Skill"]= {"Below":30}
+        self.bandmate_dict["40"]["Creativity"]={"Below":25}
+        self.bandmate_dict["40"]["Energy"] = {"Above":55}
+
+        self.bandmate_dict["41"]={}
+        self.bandmate_dict["41"]["Creativity"]= {"Below":20}
+
+        self.bandmate_dict["42"]={}
+        self.bandmate_dict["42"]["Technical Skill"]={"Below":25}
+
+        self.bandmate_dict["50"]= {}
+        self.bandmate_dict["50"]["Vitality"]= {"Above":50}
+        self.bandmate_dict["50"]["Energy"] = {"Above":30}
+
+
+
+
     def get_primary_list(self):
         primary_bandmate_list = []
         for i in self.bandmate_dict.keys():
@@ -70,13 +99,11 @@ class Settings:
                 primary_bandmate_list.append(i)
         return primary_bandmate_list
 
-    def get_secondary_list(self):
-        secondary_bandmate_dict = {}
-        for i in primary_bandmate_list:
-            secondary_bandmate_dict[i] = []
-            for j in self.setting.bandmate_dict.keys():
-                #the index's are set up so the secondary is between 1-9 above its primary
-                if int(j) > int(i) and int(j) < (int(i)+10):
-                    secondary_bandmate_dict[i].append(j)
-        return secondary_bandmate_dict
+    def get_secondary_list(self,primary_bandmate):
+        secondary_bandmate_list = []
+        for i in self.bandmate_dict.keys():
+            #the index's are set up so the secondary is between 1-9 above its primary
+            if int(i) > int(primary_bandmate) and int(i) < (int(primary_bandmate)+10):
+                secondary_bandmate_list.append(i)
+        return secondary_bandmate_list
 

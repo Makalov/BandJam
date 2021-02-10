@@ -58,24 +58,28 @@ class GameDesignUtility:
             self.stat[i]["Value"] = 30
 
         #set up array to store bandmates and a dictionary to store popup windows
-        self.current_bandmates = []
+        self.current_primary_bandmates = []
+        self.current_secondary_bandmates = []
+        self.primary_bandmate_to_quit = []
+        self.secondary_bandmate_to_quit = []
         self.bandmate_popups = {}
             
         # set up row number variable to increment to easily insert a row
         rownum = 1
 
         # Add buttons to load bandmates
-        Label(self.input_frame, text="Add Primary Bandmate").grid(row = rownum, column = 1)
         self.add_bandmate_button = Button(self.input_frame, text = "Add Primary Bandmate", command=self.add_primary_bandmate)
+        self.add_bandmate_button.grid(row = rownum, column = 1)
+
+        self.add_bandmate_button = Button(self.input_frame, text = "Add Secondary Bandmate", command=self.add_secondary_bandmate)
         self.add_bandmate_button.grid(row = rownum, column = 2)
 
-        Label(self.input_frame, text="Add Secondary Bandmate").grid(row = rownum, column = 1)
-        self.add_bandmate_button = Button(self.input_frame, text = "Add Secondary Bandmate", command=self.add_secondary_bandmate)
-        self.add_bandmate_button.grid(row = rownum, column = 3)
+        # Add button to check for flags
+        self.check_bandmate_button = Button(self.input_frame, text = "Check flags", command=self.check_bandmate_flag)
+        self.check_bandmate_button.grid(row = rownum, column = 3)
 
-        # Add button to check if conditions met
-        Label(self.input_frame, text="Check Bandmate Quit").grid(row = rownum, column = 1)
-        self.check_bandmate_button = Button(self.input_frame, text = "Check Bandmate Quit", command=self.check_bandmate_quit)
+        # Add button for end of month
+        self.check_bandmate_button = Button(self.input_frame, text = "End of Month", command=self.end_of_month)
         self.check_bandmate_button.grid(row = rownum, column = 4)
         rownum += 1
 
@@ -128,6 +132,13 @@ class GameDesignUtility:
         self.save_button = Button(self.input_frame, text = "Save to file", command = self.save_to_file)
         self.save_button.grid(row = rownum, column = 3)
 
+        #initialize the 2 primary and 2 secondary bandmates
+        self.add_primary_bandmate()
+        self.add_primary_bandmate()
+        self.add_secondary_bandmate()
+        self.add_secondary_bandmate()
+
+
     def create_bandmate_window(self, bandmate_index):
         #draws the popup window for the bandmate
         self.bandmate_popups[bandmate_index] = Tk()
@@ -144,42 +155,82 @@ class GameDesignUtility:
 
 
     def add_primary_bandmate(self):
+
+        if len(self.current_primary_bandmates) == 2:
+            print("error, max primary bandmates reached")
+            return
+        
         new_bandmate_index = -1
         #repeat until we find a primary bandmate stat that's not already there
-        if len(self.current_bandmates) <2:
-            while new_bandmate_index not in self.current_bandmates:
+        if len(self.current_primary_bandmates) <2:
+            while new_bandmate_index not in self.current_primary_bandmates:
                 #grab a stat from the list
                 new_bandmate_index = random.choice(self.setting.get_primary_list())
                 #add stat if not there
-                if new_bandmate_index not in self.current_bandmates:
-                    self.current_bandmates.append(new_bandmate_index)
+                if new_bandmate_index not in self.current_primary_bandmates:
+                    self.current_primary_bandmates.append(new_bandmate_index)
                     self.create_bandmate_window(new_bandmate_index)
                 else: #else repeat the loop
                     new_bandmate_index = -1
 
+
     def add_secondary_bandmate(self):
-        pass
+        #create available secondary bandmate list based on current primary bandmates
+        secondary_list = []
+        for i in self.current_primary_bandmates:
+            secondary_list += self.setting.get_secondary_list(i)
     
-    def check_bandmate_quit(self):
+        #check if there is secondary bandmates available to add
+        if secondary_list == []:
+            print("error, no secondary bandmate available to add")
+            return
+        if set(secondary_list).issubset(set(self.current_secondary_bandmates)):
+            print("error, no secondary bandmate available to add")
+            return
+        if len(self.current_secondary_bandmates) == 3:
+            print("error, max secondary bandmates reached")
+            return
+
+        new_bandmate_index = -1
+        #repeat until we find a primary bandmate stat that's not already there
+        if len(self.current_secondary_bandmates) <3:
+            while new_bandmate_index not in self.current_secondary_bandmates:
+                #grab a stat from the list
+                new_bandmate_index = random.choice(secondary_list)
+                #add stat if not there
+                if new_bandmate_index not in self.current_secondary_bandmates:
+                    self.current_secondary_bandmates.append(new_bandmate_index)
+                    self.create_bandmate_window(new_bandmate_index)
+                else: #else repeat the loop
+                    new_bandmate_index = -1 
+
+
+    def check_bandmate_flag(self):
         #this function goes through each bandmate in the list and each of their attributes and check if their stats matches with their conditions
-        for i in self.current_bandmates:
-            bandmate_quit = True
+        current_bandmates = self.current_primary_bandmates + self.current_secondary_bandmates
+        for i in current_bandmates:
+            bandmate_flag = True
             #this following loops goes through each stat to see if they match, if any of them do not match they do not quit
             for stat in self.setting.bandmate_dict[i].keys():
                 for condition in self.setting.bandmate_dict[i][stat].keys():
                     if condition == "Above":
                         if self.stat[stat]["Value"] <= self.setting.bandmate_dict[i][stat][condition]:
-                            bandmate_quit = False
+                            bandmate_flag = False
                     elif condition == "Equal":
                         if self.stat[stat]["Value"] < self.setting.bandmate_dict[i][stat][condition]:
-                            bandmate_quit = False
+                            bandmate_flag = False
                         elif self.stat[stat]["Value"] > self.setting.bandmate_dict[i][stat][condition]:
-                            bandmate_quit = False
+                            bandmate_flag = False
                     elif condition == "Below":
                         if self.stat[stat]["Value"] >= self.setting.bandmate_dict[i][stat][condition]:
-                            bandmate_quit = False
-            if bandmate_quit == True:
-                self.remove_bandmate(i)
+                            bandmate_flag = False
+            if bandmate_flag == True:
+                if i in self.current_primary_bandmates:
+                    if i not in self.primary_bandmate_to_quit:
+                        self.primary_bandmate_to_quit.append(i)
+                elif i not in self.secondary_bandmate_to_quit:
+                    self.secondary_bandmate_to_quit.append(i)
+
 
     def remove_bandmate(self, bandmate_index):
         #remove the bandmate from list and close window
@@ -187,43 +238,81 @@ class GameDesignUtility:
         #delete the window object
         del self.bandmate_popups[bandmate_index]
         #remove the bandmate from the list of current bandmates
-        self.current_bandmates.remove(bandmate_index)
+        if (int(bandmate_index) %10)== 0:
+            self.current_primary_bandmates.remove(bandmate_index)
+        else:
+            self.current_secondary_bandmates.remove(bandmate_index)
  
 
     def do_activity(self):
         #figure out what activity to do by looking at what's selected in the drop down list
         today_activity = self.activity.get()
 
-        #cycle through the stat increases in the activity and add it to the stat but also check if they are out of bound
-        for i in self.setting.activity_dict[today_activity]:
-            self.stat[i]["Value"] += self.setting.activity_dict[today_activity][i]
+        for repeat_activity in range(5):
+            #cycle through the stat increases in the activity and add it to the stat but also check if they are out of bound
+            for i in self.setting.activity_dict[today_activity]:
+                self.stat[i]["Value"] += self.setting.activity_dict[today_activity][i]
 
-            #check if the values are maxed out or below minimum
-            if self.stat[i]["Value"] >= self.setting.stat_dict[i]["Max"]:
-                self.stat[i]["Value"] = self.setting.stat_dict[i]["Max"]
-            elif self.stat[i]["Value"] <= self.setting.stat_dict[i]["Min"]:
-                self.stat[i]["Value"] = self.setting.stat_dict[i]["Min"]
+                #check if the values are maxed out or below minimum
+                if self.stat[i]["Value"] >= self.setting.stat_dict[i]["Max"]:
+                    self.stat[i]["Value"] = self.setting.stat_dict[i]["Max"]
+                elif self.stat[i]["Value"] <= self.setting.stat_dict[i]["Min"]:
+                    self.stat[i]["Value"] = self.setting.stat_dict[i]["Min"]
             
-            #write the new value into the box
-            self.stat[i]["Entrybox"].delete(0,'end')
-            self.stat[i]["Entrybox"].insert(END, self.stat[i]["Value"])
+                #write the new value into the box
+                self.stat[i]["Entrybox"].delete(0,'end')
+                self.stat[i]["Entrybox"].insert(END, self.stat[i]["Value"])
         
-        #increment the day count
-        self.day_count += 1
-        self.date_entrybox.delete(0,'end')
-        self.date_entrybox.insert(END, self.day_count)
+            #increment the day count
+            self.day_count += 1
+            self.date_entrybox.delete(0,'end')
+            self.date_entrybox.insert(END, self.day_count)
 
-        #create a line that adds to the bottom of the output
-        csv_line = '{},{}'.format(self.day_count, today_activity)
-        output_line = 'Day:'+csv_line
-        for i in self.setting.stat_list:
-            output_line += ", {}:{} ".format(i, self.stat[i]["Value"])
-            csv_line += ",{}".format(self.stat[i]["Value"])
+            #update flags
+            self.check_bandmate_flag()
 
-        self.csv_output.append(csv_line)
-        self.output.append(output_line)
-        self.output_textbox.insert(tk.END, output_line+"\n")
-        #print(self.output)
+            #if the date passes the 28 mark do end of month tasks
+            if (self.day_count % 28) == 0:
+                self.end_of_month()
+
+            #create a line that adds to the bottom of the output
+            csv_line = '{},{}'.format(self.day_count, today_activity)
+            output_line = 'Day:'+csv_line
+            for i in self.setting.stat_list:
+                output_line += ", {}:{} ".format(i, self.stat[i]["Value"])
+                csv_line += ",{}".format(self.stat[i]["Value"])
+            output_line +=", Primary Bandmates:{}, Secondary Bandmates: {}".format(self.current_primary_bandmates, self.current_secondary_bandmates)
+
+            self.csv_output.append(csv_line)
+            self.output.append(output_line)
+            self.output_textbox.insert(tk.END, output_line+"\n")
+
+        print("primary to quit {}".format(self.primary_bandmate_to_quit))
+        print("secondary to quit {}".format(self.secondary_bandmate_to_quit))
+
+    def end_of_month(self):
+        #this function checks whether there is anybody flagged. If flagged then they quit, otherwise add another bandmate
+
+        #add a bandmate if nobody quits, we can combine these but then it gets hard to read
+        if len(self.primary_bandmate_to_quit) == 0 and len(self.secondary_bandmate_to_quit) == 0:
+            #if there's no primary bandmates left
+            if len(self.current_primary_bandmates) == 0:
+                self.add_primary_bandmate()
+            #if there's one primary bandmate and less than 2 secondary bandmate
+            elif len(self.current_primary_bandmates) == 1 and len(self.current_secondary_bandmates) < 2:
+                self.add_secondary_bandmate()
+            #if there's one primary bandmate and 2 secondary bandmate
+            elif len(self.current_primary_bandmates) == 1 and len(self.current_secondary_bandmates) == 2:
+                self.add_primary_bandmate()
+            #if there're two primary bandmates and less than 3 secondary bandmate
+            elif len(self.current_primary_bandmates) == 2 and len(self.current_secondary_bandmates) < 3:
+                self.add_secondary_bandmate()
+        #if somebody quits then we remove that person
+        else:
+            for i in self.primary_bandmate_to_quit:
+                self.remove_bandmate(i)
+            for i in self.secondary_bandmate_to_quit:
+                self.remove_bandmate(i)
 
 
     def set_all(self):
