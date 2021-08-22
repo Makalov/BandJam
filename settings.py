@@ -50,6 +50,9 @@ class Settings:
 
         self.bandmate_dict["12"]= {}
         self.bandmate_dict["12"]["Technical Skill"]={"Above":40} 
+        
+        self.bandmate_dict["13"]= {}
+        self.bandmate_dict["13"]["Intelligence"]={"Above":25} 
 
         self.bandmate_dict["20"]={}
         self.bandmate_dict["20"]["Charisma"]= {"Above":40}
@@ -61,6 +64,9 @@ class Settings:
 
         self.bandmate_dict["22"]={}
         self.bandmate_dict["22"]["Creativity"]={"Equal":0}
+
+        self.bandmate_dict["23"]={}
+        self.bandmate_dict["23"]["Intelligence"]={"Above":25} 
 
         self.bandmate_dict["30"]= {}
         self.bandmate_dict["30"]["Vitality"]= {"Above":30}
@@ -84,13 +90,49 @@ class Settings:
         self.bandmate_dict["42"]={}
         self.bandmate_dict["42"]["Technical Skill"]={"Below":25}
 
+        self.bandmate_dict["43"]={}
+        self.bandmate_dict["43"]["Energy"] = {"Above":50}
+
         self.bandmate_dict["50"]= {}
         self.bandmate_dict["50"]["Vitality"]= {"Above":50}
         self.bandmate_dict["50"]["Energy"] = {"Above":30}
 
+        self.bandmate_dict["60"]= {}
+        self.bandmate_dict["60"]["Charisma"]= {"Below":30}
+        self.bandmate_dict["60"]["Intelligence"] = {"Above":55}
+        self.bandmate_dict["60"]["Energy"] = {"Below":30}
+        
+        self.bandmate_dict["70"]= {}
+        self.bandmate_dict["70"]["Charisma"]= {"Below":20}
+        self.bandmate_dict["70"]["Creativity"] = {"Below":20}
+        self.bandmate_dict["70"]["Technical Skill"] = {"Above":60}       
 
+        self.bandmate_dict["71"]={}
+        self.bandmate_dict["71"]["Charisma"]= {"Below":25}
 
+        self.bandmate_dict["72"]={}
+        self.bandmate_dict["72"]["Technical Skill"]={"Above":60}
+        
+        self.bandmate_dict["80"]= {}
+        self.bandmate_dict["80"]["Charisma"]= {"Above":45}
+        self.bandmate_dict["80"]["Technical Skill"] = {"Below":5}
+        self.bandmate_dict["80"]["Street Cred"] = {"Below":5}          
+        
+        self.bandmate_dict["81"]={}
+        self.bandmate_dict["81"]["Technical Skill"]= {"Below":10}
 
+        self.bandmate_dict["82"]={}
+        self.bandmate_dict["82"]["Street Cred"]={"Below":10}    
+
+        self.bandmate_dict["90"]= {}
+        self.bandmate_dict["90"]["Charisma"]= {"Above":40}
+        self.bandmate_dict["90"]["Street Cred"] = {"Above":50}
+        self.bandmate_dict["90"]["Energy"] = {"Above":40}   
+
+        self.bandmate_dict["100"]= {}
+        self.bandmate_dict["100"]["Vitality"]= {"Below":20}
+        self.bandmate_dict["90"]["Street Cred"] = {"Below":20}         
+        
     def get_primary_list(self):
         primary_bandmate_list = []
         for i in self.bandmate_dict.keys():

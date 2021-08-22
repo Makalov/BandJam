@@ -311,7 +311,8 @@ class GameDesignUtility:
                 self.remove_bandmate(i)
             for i in self.secondary_bandmate_to_quit:
                 self.remove_bandmate(i)
-
+        self.primary_bandmate_to_quit.clear()
+        self.secondary_bandmate_to_quit.clear()
 
     def set_all(self):
         #this function sets everything
