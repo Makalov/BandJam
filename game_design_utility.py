@@ -50,6 +50,8 @@ class GameDesignUtility:
         # Create a Tkinter variable for activity drop down items
         self.activity = StringVar(master)
         self.activity.set("Activity Z")
+        self.weekend_activity = StringVar(master)
+        self.weekend_activity.set("Weekend Activity 1")
 
         #set up stat dictionary with initial stat values
         self.stat = {}
@@ -93,6 +95,16 @@ class GameDesignUtility:
         self.activity_button.grid(row = rownum, column = 3)
         rownum += 1
 
+        # Put Weekend Activity drop down on GUI
+        self.event_menu = OptionMenu(self.input_frame, self.weekend_activity, *self.setting.weekend_activity_list)
+        Label(self.input_frame, text="Choose weekend activity").grid(row = rownum, column = 1)
+        self.event_menu.grid(row = rownum, column = 2)
+
+        # Add button to perform activity
+        self.activity_button = Button(self.input_frame, text = "Perform Weekend Activity", command=self.do_weekend_activity)
+        self.activity_button.grid(row = rownum, column = 3)
+        rownum += 1
+
         # Add the stats boxes and the set stat buttons and populate with value
         for i in self.stat:
             Label(self.input_frame, text = i).grid(row = rownum, column = 1)
@@ -133,17 +145,19 @@ class GameDesignUtility:
         self.save_button.grid(row = rownum, column = 3)
 
         #initialize the 2 primary and 2 secondary bandmates
+        self.limit_secondary_to_primary = False # false for now, we can set this later if we want to associate secondary stats with primary
         self.add_primary_bandmate()
         self.add_primary_bandmate()
-        self.add_secondary_bandmate()
-        self.add_secondary_bandmate()
+        self.add_secondary_bandmate(self.limit_secondary_to_primary)
+        self.add_secondary_bandmate(self.limit_secondary_to_primary)
 
 
     def create_bandmate_window(self, bandmate_index):
         #draws the popup window for the bandmate
         self.bandmate_popups[bandmate_index] = Tk()
-        self.bandmate_popups[bandmate_index].wm_title(bandmate_index)
-        Label(self.bandmate_popups[bandmate_index], text="Band Member Name").grid(row = 1, column = 1)
+        self.bandmate_popups[bandmate_index].geometry("300x150")
+        self.bandmate_popups[bandmate_index].wm_title(self.setting.bandmate_dict[bandmate_index]["Name"])
+        Label(self.bandmate_popups[bandmate_index], text=self.setting.bandmate_dict[bandmate_index]["Name"]).grid(row = 1, column = 1)
         bandmate_rownum = 2
         for stat in self.setting.bandmate_dict[bandmate_index].keys():
             #print out all the stat conditions to be met for the character
@@ -174,11 +188,15 @@ class GameDesignUtility:
                     new_bandmate_index = -1
 
 
-    def add_secondary_bandmate(self):
+    def add_secondary_bandmate(self, limit_secondary_to_primary):
         #create available secondary bandmate list based on current primary bandmates
         secondary_list = []
-        for i in self.current_primary_bandmates:
-            secondary_list += self.setting.get_secondary_list(i)
+        if limit_secondary_to_primary == True :
+            for i in self.current_primary_bandmates:
+                secondary_list += self.setting.get_secondary_list(i)
+        else:
+            for i in self.setting.get_primary_list():
+                secondary_list += self.setting.get_secondary_list(i)
     
         #check if there is secondary bandmates available to add
         if secondary_list == []:
@@ -192,12 +210,11 @@ class GameDesignUtility:
             return
 
         new_bandmate_index = -1
-        #repeat until we find a primary bandmate stat that's not already there
+        #repeat until we find a secondary bandmate not already in the band up to 3
         if len(self.current_secondary_bandmates) <3:
             while new_bandmate_index not in self.current_secondary_bandmates:
-                #grab a stat from the list
                 new_bandmate_index = random.choice(secondary_list)
-                #add stat if not there
+                #add secondary bandmate if not already in the list, else repeat the loop again
                 if new_bandmate_index not in self.current_secondary_bandmates:
                     self.current_secondary_bandmates.append(new_bandmate_index)
                     self.create_bandmate_window(new_bandmate_index)
@@ -287,25 +304,58 @@ class GameDesignUtility:
             self.output.append(output_line)
             self.output_textbox.insert(tk.END, output_line+"\n")
 
+    def do_weekend_activity(self):
+        #figure out what activity to do by looking at what's selected in the drop down list
+        weekend_activity = self.weekend_activity.get()
+
+        #increment the day count
+        self.day_count += 2
+        self.date_entrybox.delete(0,'end')
+        self.date_entrybox.insert(END, self.day_count)
+
+        #update flags
+        self.check_bandmate_flag()
+
+        #if the date passes the 28 mark do end of month tasks
+        if (self.day_count % 28) == 0:
+            self.end_of_month()
+
+        #create a line that adds to the bottom of the output
+        csv_line = '{},{}'.format(self.day_count, weekend_activity)
+        output_line = 'Day:'+csv_line
+        for i in self.setting.stat_list:
+            output_line += ", {}:{} ".format(i, self.stat[i]["Value"])
+            csv_line += ",{}".format(self.stat[i]["Value"])
+        output_line +=", Primary Bandmates:{}, Secondary Bandmates: {}".format(self.current_primary_bandmates, self.current_secondary_bandmates)
+
+        self.csv_output.append(csv_line)
+        self.output.append(output_line)
+        self.output_textbox.insert(tk.END, output_line+"\n")
 
     def end_of_month(self):
         #this function checks whether there is anybody flagged. If flagged then they quit, otherwise add another bandmate
-
         #add a bandmate if nobody quits, we can combine these but then it gets hard to read
         if len(self.primary_bandmate_to_quit) == 0 and len(self.secondary_bandmate_to_quit) == 0:
+            self.output_textbox.insert(tk.END, "No one quit this month\n")
+            self.output_textbox.insert(tk.END, "Number of Primary Bandmate: {}\n".format(len(self.current_primary_bandmates)))
+            self.output_textbox.insert(tk.END, "Number of Secondary Bandmate: {}\n".format(len(self.current_secondary_bandmates)))
             #if there's no primary bandmates left
             if len(self.current_primary_bandmates) == 0:
                 self.add_primary_bandmate()
+                self.output_textbox.insert(tk.END, "One primary bandmate added\n")
             #if there's one primary bandmate and less than 2 secondary bandmate
             elif len(self.current_primary_bandmates) == 1 and len(self.current_secondary_bandmates) < 2:
-                self.add_secondary_bandmate()
+                self.add_secondary_bandmate(self.limit_secondary_to_primary)
+                self.output_textbox.insert(tk.END, "One secondary bandmate added\n")
             #if there's one primary bandmate and 2 secondary bandmate
             elif len(self.current_primary_bandmates) == 1 and len(self.current_secondary_bandmates) == 2:
                 self.add_primary_bandmate()
+                self.output_textbox.insert(tk.END, "One primary bandmate added\n")
             #if there're two primary bandmates and less than 3 secondary bandmate
             elif len(self.current_primary_bandmates) == 2 and len(self.current_secondary_bandmates) < 3:
-                self.add_secondary_bandmate()
-        #if somebody quits then we remove that person
+                self.add_secondary_bandmate(self.limit_secondary_to_primary)
+                self.output_textbox.insert(tk.END, "One secondary bandmate added\n")
+        #if somebody quits then we remove that person and don't add a bandmember
         else:
             for i in self.primary_bandmate_to_quit:
                 self.remove_bandmate(i)
@@ -315,7 +365,7 @@ class GameDesignUtility:
         self.secondary_bandmate_to_quit.clear()
 
     def set_all(self):
-        #this function sets everything
+        #this function sets the game state to the one in input
         
         #grab all the values from the boxes and save it to the game variables
         for i in self.setting.stat_list:
@@ -348,6 +398,7 @@ class GameDesignUtility:
 
 
     def reset(self):
+        #return everything to default values
         for i in self.setting.stat_list:
             self.stat[i]["Value"] = self.setting.stat_dict[i]["Default"]
             self.stat[i]["Entrybox"].delete(0,'end')
